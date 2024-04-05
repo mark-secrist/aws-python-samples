@@ -142,12 +142,9 @@ def clearBucketContents(s3Resource, bucket):
     """
    my_bucket = s3Resource.Bucket(bucket)
    print(f'Deleting objects in bucket: {bucket}')
+   my_bucket.objects.all().delete()
    # Potentially enable detailed logging for troubleshooting the method
    #boto3.set_stream_logger('')
-   for my_bucket_object in my_bucket.objects.all():
-     print(f' - Deleting {my_bucket_object.key}')
-     obj = s3Resource.Object(bucket_name=bucket, key=my_bucket_object.key)
-     obj.delete()
 
 # Upload a file 
 def uploadFile(s3Client, bucket, source_file_name, key_name, content_type, metadata={}):
