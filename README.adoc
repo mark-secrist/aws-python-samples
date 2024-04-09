@@ -1,0 +1,38 @@
+= Setting up for AWS Python projects
+
+== Install `boto3` Python library
+
+`pip install boto3`
+
+== Set up accounts
+
+These projects use a profile called `app-user`.
+This was initially implemented from an actual IAM user called `app-user` that does not
+have a console account but was configured with credentials (AWS Access Key/AWS Secret Access Code).
+
+These are stored in the local AWS credentials file via the `aws configure` command.
+To set this up, you'll need to do the following.
+
+1. Create a user (IAM user name doesn't really matter but may be useful to align it to the profile)
+1. Create Access keys that will be used to supply to the `aws configure` command
+1. Set up profile as follows
++
+```
+aws configure --profile app-user
+
+```
+
+If running in a Cloud9 environment, you will be using default credentials associated with the Cloud9 EC2 instance.
+As a result, locate the s3/main.py file and change the profile at the top of the file.
+
+```
+# Create a session with 'app-user' profile s3Session = boto3.Session(profile_name='app-user')
+```
+should be 
+
+```
+# Create a session with 'default' profile 
+s3Session = boto3.Session(profile_name='default')
+# OR just use the simpler configuration that uses the default profile
+s3Client = boto3.client('s3')
+```
