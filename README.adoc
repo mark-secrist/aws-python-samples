@@ -6,8 +6,8 @@
 
 == Set up accounts
 
-These projects use a profile called `app-user`.
-This was initially implemented from an actual IAM user called `app-user` that does not
+These projects use a profile called `joe-user`.
+This was initially implemented from an actual IAM user called `joe-user` that does not
 have a console account but was configured with credentials (AWS Access Key/AWS Secret Access Code).
 
 These are stored in the local AWS credentials file via the `aws configure` command.
@@ -18,7 +18,7 @@ To set this up, you'll need to do the following.
 1. Set up profile as follows
 +
 ```
-aws configure --profile app-user
+aws configure --profile joe-user
 
 ```
 
@@ -26,7 +26,7 @@ If running in a Cloud9 environment, you will be using default credentials associ
 As a result, locate the s3/main.py file and change the profile at the top of the file.
 
 ```
-# Create a session with 'app-user' profile s3Session = boto3.Session(profile_name='app-user')
+# Create a session with 'joe-user' profile s3Session = boto3.Session(profile_name='joe-user')
 ```
 should be 
 
@@ -36,6 +36,11 @@ s3Session = boto3.Session(profile_name='default')
 # OR just use the simpler configuration that uses the default profile
 s3Client = boto3.client('s3')
 ```
+
+[NOTE]
+It is often recommended to use the default user, especially when running in an EC2 
+Instance having an instance profile (role) assigned or Lambda function having a role assigned.
+In these cases, you likely would not use profiles, which are more oriented for the AWS CLI.
 
 == Ensure user has appropriate permissions (IAM Polcies)
 
