@@ -16,8 +16,12 @@ def main():
     Perform all of the tasks outlined above
     """
     # Initialize variables, including the DDB client and resource references
-    ddbClient = boto3.client('dynamodb')
-    ddbResource = boto3.resource('dynamodb')
+    s3Session = boto3.Session(profile_name='joe-user')
+    ddbClient = s3Session.client('dynamodb')
+    ddbResource = s3Session.resource('dynamodb')
+    # Alternatively, you can create client and resource references using default credentials as:
+    # ddbClient = boto3.client('dynamodb')
+    # ddbResource = boto3.resource('dynamodb')
     jsonFileName = "notes.json"
     tableName = "Notes"
 
