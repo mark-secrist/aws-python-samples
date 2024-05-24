@@ -48,6 +48,8 @@ def main():
 
    listBucketContents(s3Resource, bucketName)
 
+   queryBucketObject(s3SessionClient, bucketName, source_file_name)
+
    url=create_presigned_url(s3SessionClient, bucketName, source_file_name)
    print(f'Presigned url = {url}')
 
@@ -190,6 +192,29 @@ def create_presigned_url(s3Client, bucket_name, object_name, expiration=3600):
 
     # The response contains the presigned URL
     return response
+
+def queryBucketObject(s3SessionClient, bucketName, source_file_name):
+   """Query the specified file using S3 Query
+      The source format is CSV
+      Output the query result as JSON
+   """
+   print(f'Querying file {source_file_name}')
+   # Find all entries in the file that contain the word 'DynamoDB'
+   query = "select * from s3object s where s.Notes like '%DynamoDB%'"
+   response = s3SessionClient.select_object_content(
+       Bucket=bucketName,
+       Key=source_file_name,
+       ExpressionType='SQL',
+       Expression=query,
+       InputSerialization={'CSV': {"FileHeaderInfo": "Use"}},
+       OutputSerialization={'JSON': {}},
+   )
+
+   # Process the response
+   for event in response['Payload']:
+       if 'Records' in event:
+           records = event['Records']['Payload'].decode('utf-8')
+           print(records)
 
 
 # Global body - invoke the main function, which will in turn invoke all the others
