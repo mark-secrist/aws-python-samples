@@ -18,45 +18,47 @@ from botocore.exceptions import ClientError
 
 def main():
    # Get a typical S3 Client, which will use the default profile and credentials
-   # s3Client = boto3.client('s3')
+   s3Client = boto3.client('s3')
+   s3Resource = boto3.resource('s3')
+   region = "us-west-1"
 
    # Create a session with 'app-user' profile
-   s3Session = boto3.Session(profile_name='app-user')
+   # s3Session = boto3.Session(profile_name='app-user')
    # From the session, get the s3 resource.
-   s3SessionClient = s3Session.client('s3')
+   # s3SessionClient = s3Session.client('s3')
    # Resource represents an object-oriented interface, which offers a higher-level
    # abstraction. This is used especially for the list bucket contents and delete bucket
    # operations.
-   s3Resource = s3Session.resource('s3')
-
+   # s3Resource = s3Session.resource('s3')
+   
    # Assign a bucket name
    bucketName="mark-test-9702144567"
 
    # Verify the bucket doesn't already exist
-   verifyBucketName(s3SessionClient, bucketName)
+   verifyBucketName(s3Client, bucketName)
 
-   createBucket(s3SessionClient, bucketName)
+   createBucket(s3Client, bucketName, region)
 
-   listBuckets(s3SessionClient)
+   listBuckets(s3Client)
 
    # Upload a file
    metaData_key = "myVal2"
    metaData_value = "lab2-testing-upload"
    source_content_type = "text/csv"
    source_file_name="notes.csv"
-   uploadFile(s3SessionClient,bucketName, source_file_name, source_file_name, source_content_type, {metaData_key: metaData_value})
+   uploadFile(s3Client,bucketName, source_file_name, source_file_name, source_content_type, {metaData_key: metaData_value})
 
    listBucketContents(s3Resource, bucketName)
 
-   queryBucketObject(s3SessionClient, bucketName, source_file_name)
+   queryBucketObject(s3Client, bucketName, source_file_name)
 
-   url=create_presigned_url(s3SessionClient, bucketName, source_file_name)
+   url=create_presigned_url(s3Client, bucketName, source_file_name)
    print(f'Presigned url = {url}')
 
    # Delete the bucket, but first clear bucket contents
    deleteBucket(s3Resource, bucketName)
 
-def createBucket(s3Client, bucket):
+def createBucket(s3Client, bucket, region):
    """Create a bucket with the specified name
 
     :param s3Client: string
@@ -65,7 +67,10 @@ def createBucket(s3Client, bucket):
     """
    # create an s3 bucket using the bucket name provided
    print("Creating bucket")
-   s3Client.create_bucket(Bucket=bucket)
+   s3Client.create_bucket(Bucket=bucket,
+                          CreateBucketConfiguration={
+                               'LocationConstraint': region 
+                          })
 
    # Wait for bucket to be created
    waiter = s3Client.get_waiter('bucket_exists')
@@ -193,7 +198,7 @@ def create_presigned_url(s3Client, bucket_name, object_name, expiration=3600):
     # The response contains the presigned URL
     return response
 
-def queryBucketObject(s3SessionClient, bucketName, source_file_name):
+def queryBucketObject(s3Client, bucketName, source_file_name):
    """Query the specified file using S3 Query
       The source format is CSV
       Output the query result as JSON
@@ -201,7 +206,7 @@ def queryBucketObject(s3SessionClient, bucketName, source_file_name):
    print(f'Querying file {source_file_name}')
    # Find all entries in the file that contain the word 'DynamoDB'
    query = "select * from s3object s where s.Notes like '%DynamoDB%'"
-   response = s3SessionClient.select_object_content(
+   response = s3Client.select_object_content(
        Bucket=bucketName,
        Key=source_file_name,
        ExpressionType='SQL',
