@@ -63,6 +63,7 @@ def createBucket(s3Client, bucket, region):
 
     :param s3Client: string
     :param bucket: string
+    :param region: string
     :return: none
     """
    # create an s3 bucket using the bucket name provided
